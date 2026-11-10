@@ -1,0 +1,157 @@
+BasicInfo:
+  Title                   : "Cytopia"
+  CompanyCode             : "00"
+  ProductCode             : "CTR-P-CYTP"
+  ContentType             : Application
+  Logo                    : Nintendo
+
+RomFs:
+  RootPath                : "data"
+
+TitleInfo:
+  Category                : Application
+  UniqueId                : 0x0C701A
+
+Option:
+  UseOnSD                 : true
+  EnableCompress          : true
+  FreeProductCode         : true
+  EnableCrypt             : false
+  MediaFootprint          : false
+
+AccessControlInfo:
+  CoreVersion             : 2
+
+  # ExHeader Format Version
+  DescVersion             : 2
+
+  # Minimum Required Kernel Version (below is for 4.5.0)
+  ReleaseKernelMajor      : "02"
+  ReleaseKernelMinor      : "33"
+
+  # ExtData
+  UseExtSaveData          : false
+
+  # FS:USER Archive Access Permissions
+  FileSystemAccess:
+   - DirectSdmc
+   - DirectSdmcWrite
+   - CtrNandRo
+   - CtrNandRw
+   - CategorySystemApplication
+   - CategoryFileSystemTool
+
+  MemoryType              : Application
+  SystemMode              : 64MB
+  SystemModeExt           : 124MB
+  CpuSpeed                : 804MHz
+  EnableL2Cache           : true
+  CanAccessCore2          : true
+
+  IdealProcessor          : 0
+  AffinityMask            : 1
+  Priority                : 16
+
+  MaxCpu                  : 0x9E
+  DisableDebug            : false
+  EnableForceDebug        : false
+  CanWriteSharedPage      : true
+  CanUsePrivilegedPriority: false
+  CanUseNonAlphabetAndNumber: true
+  PermitMainFunctionArgument: true
+  CanShareDeviceMemory    : true
+  RunnableOnSleep         : false
+  SpecialMemoryArrange    : true
+
+  ResourceLimitCategory   : APPLICATION
+
+  InterruptNumbers:
+
+  SystemCallAccess:
+    ArbitrateAddress: 34
+    Break: 60
+    CancelTimer: 28
+    ClearEvent: 25
+    ClearTimer: 29
+    CloseHandle: 35
+    ConnectToPort: 45
+    ControlMemory: 1
+    CreateAddressArbiter: 33
+    CreateEvent: 23
+    CreateMemoryBlock: 30
+    CreateMutex: 19
+    CreateSemaphore: 21
+    CreateThread: 8
+    CreateTimer: 26
+    DuplicateHandle: 39
+    ExitProcess: 3
+    ExitThread: 9
+    GetCurrentProcessorNumber: 17
+    GetHandleInfo: 41
+    GetProcessId: 53
+    GetProcessIdOfThread: 54
+    GetProcessIdealProcessor: 6
+    GetProcessInfo: 43
+    GetResourceLimit: 56
+    GetResourceLimitCurrentValues: 58
+    GetResourceLimitLimitValues: 57
+    GetSystemInfo: 42
+    GetSystemTick: 40
+    GetThreadContext: 59
+    GetThreadIdealProcessor: 15
+    GetThreadId: 55
+    GetThreadInfo: 44
+    GetThreadPriority: 11
+    MapMemoryBlock: 31
+    OutputDebugString: 61
+    QueryMemory: 2
+    ReleaseMutex: 20
+    ReleaseSemaphore: 22
+    SendSyncRequest1: 46
+    SendSyncRequest2: 47
+    SendSyncRequest3: 48
+    SendSyncRequest4: 49
+    SendSyncRequest: 50
+    SetThreadPriority: 12
+    SetTimer: 27
+    SignalEvent: 24
+    SleepThread: 10
+    UnmapMemoryBlock: 32
+    WaitSynchronization1: 36
+    WaitSynchronizationN: 37
+
+  ServiceAccessControl:
+   - APT:U
+   - ac:u
+   - am:net
+   - boss:U
+   - cam:u
+   - cecd:u
+   - cfg:nor
+   - cfg:u
+   - csnd:SND
+   - dsp::DSP
+   - fs:USER
+   - gsp::Gpu
+   - gsp::Lcd
+   - hid:USER
+   - http:C
+   - ir:rst
+   - ir:u
+   - ir:USER
+   - ldr:ro
+   - mic:u
+   - ndm:u
+   - news:u
+   - nwm::UDS
+   - ptm:sysm
+   - ptm:u
+   - pxi:dev
+   - soc:U
+   - ssl:C
+   - y2r:u
+
+SystemControlInfo:
+  SaveDataSize: 0KB
+  RemasterVersion: 0
+  StackSize: 0x40000

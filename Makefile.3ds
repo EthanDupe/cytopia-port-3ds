@@ -1,0 +1,167 @@
+#---------------------------------------------------------------------------------
+# Makefile.3ds - Direct devkitARM + libctru + SDL2 build for Cytopia (New 3DS)
+# Usage:
+#   make -f Makefile.3ds
+# Produces:
+#   Cytopia.cia  (Installable 3DS CIA package with RomFS bundled)
+#   Cytopia.3dsx (Homebrew Launcher executable with RomFS bundled)
+#   Cytopia.smdh (3DS icon & metadata)
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(DEVKITPRO)),)
+export DEVKITPRO := /opt/devkitpro
+endif
+ifeq ($(strip $(DEVKITARM)),)
+export DEVKITARM := $(DEVKITPRO)/devkitARM
+endif
+
+PORTLIBS    := $(DEVKITPRO)/portlibs/3ds
+LIBCTRU     := $(DEVKITPRO)/libctru
+export PATH := $(DEVKITPRO)/tools/bin:$(DEVKITARM)/bin:$(PORTLIBS)/bin:$(PATH)
+
+PREFIX      := $(DEVKITARM)/bin/arm-none-eabi-
+CC          := $(PREFIX)gcc
+CXX         := $(PREFIX)g++
+AR          := $(PREFIX)ar
+OBJCOPY     := $(PREFIX)objcopy
+STRIP       := $(PREFIX)strip
+
+TARGET      := Cytopia
+BUILD       := build_3ds_make
+ROMFS_DIR   := data
+
+APP_TITLE   := Cytopia
+APP_DESCRIPTION := City-building game (New 3DS Port)
+APP_AUTHOR  := CytopiaTeam
+APP_ICON    := data/resources/images/app_icons/cytopia_icon.png
+BANNER_IMG  := 3ds_banner/banner.png
+BANNER_WAV  := 3ds_banner/banner_jingle.wav
+CIA_RSF     := 3ds_banner/cia.rsf
+
+ARCH        := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+
+PKG_CONFIG  := PKG_CONFIG_PATH=$(PORTLIBS)/lib/pkgconfig pkg-config --static
+SDL_CFLAGS  := $(shell $(PKG_CONFIG) --cflags sdl2 SDL2_image SDL2_ttf 2>/dev/null)
+SDL_LIBS    := $(shell $(PKG_CONFIG) --libs SDL2_image SDL2_ttf sdl2 2>/dev/null)
+ifeq ($(strip $(SDL_LIBS)),)
+SDL_LIBS    := -lSDL2_image -lSDL2_ttf -lSDL2 -lfreetype -lpng16 -lpng -ljpeg -lbz2 -lz
+endif
+
+INCLUDES    := \
+	-Isrc \
+	-Isrc/engine \
+	-Isrc/engine/basics \
+	-Isrc/engine/common \
+	-Isrc/engine/GameObjects \
+	-Isrc/engine/map \
+	-Isrc/util \
+	-Iexternal/header_only \
+	-Iexternal/imgui \
+	-Iexternal/imgui/backends \
+	-I$(PORTLIBS)/include \
+	-I$(PORTLIBS)/include/SDL2 \
+	-I$(LIBCTRU)/include \
+	$(SDL_CFLAGS)
+
+DEFINES     := -D__3DS__ -D_3DS -DARM11 -DVERSION="\"Cytopia 0.4 - 3DS Edition\""
+
+CFLAGS      := -g -Wall -O2 -mword-relocations -ffunction-sections $(ARCH) $(INCLUDES) $(DEFINES)
+CXXFLAGS    := $(CFLAGS) -std=c++17 -fexceptions -frtti
+
+LDFLAGS     := -specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(BUILD)/$(TARGET).map \
+	-L$(PORTLIBS)/lib -L$(LIBCTRU)/lib
+
+LIBS        := $(SDL_LIBS) -lctru -lm
+
+CPP_SOURCES := \
+	src/main.cxx \
+	src/Game.cxx \
+	src/MainMenu.cxx \
+	src/util/LOG.cxx \
+	src/util/Filesystem.cxx \
+	src/util/Exception.cxx \
+	src/util/OSystem.cxx \
+	src/util/desktop/Filesystem.cxx \
+	src/services/Randomizer.cxx \
+	src/services/GameClock.cxx \
+	src/services/ResourceManager.cxx \
+	src/engine/basics/Camera.cxx \
+	src/engine/basics/isoMath.cxx \
+	src/engine/basics/mapEdit.cxx \
+	src/engine/basics/PointFunctions.cxx \
+	src/engine/basics/Settings.cxx \
+	src/engine/basics/GameStates.cxx \
+	src/engine/basics/utils.cxx \
+	src/engine/GameObjects/MapNode.cxx \
+	src/engine/map/MapFunctions.cxx \
+	src/engine/map/MapLayers.cxx \
+	src/engine/map/TerrainGenerator.cxx \
+	src/engine/EventManager.cxx \
+	src/engine/Map.cxx \
+	src/engine/Sprite.cxx \
+	src/engine/ResourcesManager.cxx \
+	src/engine/TileManager.cxx \
+	src/engine/UIManager.cxx \
+	src/engine/WindowManager.cxx \
+	src/game/ZoneArea.cxx \
+	src/game/ZoneManager.cxx \
+	src/game/PowerManager.cxx \
+	src/game/PowerGrid.cxx \
+	src/game/GamePlay.cxx \
+	src/game/ui/SettingsMenu.cxx \
+	src/game/ui/PauseMenu.cxx \
+	src/game/ui/LoadMenu.cxx \
+	src/game/ui/BuildMenu.cxx \
+	src/game/ui/GameTimeMenu.cxx \
+	external/imgui/imgui.cpp \
+	external/imgui/imgui_draw.cpp \
+	external/imgui/imgui_tables.cpp \
+	external/imgui/imgui_widgets.cpp \
+	external/imgui/backends/imgui_impl_sdl.cpp \
+	external/imgui/backends/imgui_impl_sdlrenderer.cpp
+
+OBJECTS     := $(patsubst %,$(BUILD)/%.o,$(CPP_SOURCES))
+
+.PHONY: all cia 3dsx clean
+
+all: $(TARGET).3dsx $(TARGET).cia
+
+3dsx: $(TARGET).3dsx
+
+cia: $(TARGET).cia
+
+$(TARGET).3dsx: $(BUILD)/$(TARGET).elf $(BUILD)/$(TARGET).smdh
+	3dsxtool $< $@ --smdh=$(BUILD)/$(TARGET).smdh --romfs=$(ROMFS_DIR)
+
+$(BUILD)/$(TARGET).bnr: $(BANNER_IMG) $(BANNER_WAV)
+	@mkdir -p $(dir $@)
+	bannertool makebanner -i $(BANNER_IMG) -a $(BANNER_WAV) -o $@
+
+$(TARGET).cia: $(BUILD)/$(TARGET).elf $(BUILD)/$(TARGET).smdh $(BUILD)/$(TARGET).bnr
+	$(STRIP) -o $(BUILD)/$(TARGET)_stripped.elf $(BUILD)/$(TARGET).elf
+	makerom -f cia -o $@ \
+		-DAPP_ENCRYPTED=false \
+		-rsf $(CIA_RSF) \
+		-target t \
+		-exefslogo \
+		-elf $(BUILD)/$(TARGET)_stripped.elf \
+		-icon $(BUILD)/$(TARGET).smdh \
+		-banner $(BUILD)/$(TARGET).bnr
+
+$(BUILD)/$(TARGET).smdh:
+	@mkdir -p $(dir $@)
+	smdhtool --create "$(APP_TITLE)" "$(APP_DESCRIPTION)" "$(APP_AUTHOR)" "$(APP_ICON)" $@ || cp $(TARGET).smdh $@
+	cp $@ $(TARGET).smdh 2>/dev/null || true
+
+$(BUILD)/$(TARGET).elf: $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(LIBS) -o $@
+
+$(BUILD)/%.cxx.o: %.cxx
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -include src/phc.hxx -c $< -o $@
+
+$(BUILD)/%.cpp.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(BUILD) $(TARGET).3dsx $(TARGET).cia
