@@ -1,0 +1,45 @@
+{
+  "SettingsVersion": 2,
+  "Audio": {
+    "Audio3DStatus": false,
+    "AudioChannels": 2,
+    "MusicVolume": 0.5,
+    "PlayMusic": true,
+    "PlaySoundEffects": true,
+    "SoundEffectsVolume": 1
+  },
+  "ConfigFiles": {
+    "AudioConfigJSONFile": "resources/data/AudioConfig.json",
+    "TileDataJSONFile": "resources/data/TileData.json",
+    "UIDataJSONFile": "resources/data/UIData.json",
+    "UILayoutJSONFile": "resources/data/UILayout.json"
+  },
+  "Game": {
+    "Biome": "Showcase",
+    "Language": "en",
+    "MapSize": 128,
+    "MaxElevationHeight": 32,
+    "ShowBuildingsInBlueprint": false,
+    "ZoneLayerTransparency": 0.6
+  },
+  "Graphics": {
+    "FullScreen": false,
+    "FullScreenMode": 0,
+    "Resolution": {
+      "Screen_Height": 240,
+      "Screen_Width": 400
+    },
+    "VSYNC": true
+  },
+  "User Interface": {
+    "BuildMenuPosition": "BOTTOM",
+    "FontFilename": "resources/fonts/pixellocale-v-1-4.ttf",
+    "Language": "en",
+    "SubMenuButtonHeight": 24,
+    "SubMenuButtonWidth": 24,
+    "DefaultFontSize": 14
+  },
+  "Debug": {
+    "WriteErrorLogToFile": false
+  }
+}
